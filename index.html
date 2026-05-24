@@ -188,6 +188,96 @@
   @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
   .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MUSIC PLAYER ── */
+  .music-player {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: linear-gradient(135deg, #2d1a1e, #3d2228);
+    border: 1px solid rgba(200,169,110,0.35);
+    border-radius: 20px; padding: 14px 18px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(200,169,110,0.15);
+    width: 280px;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+  .music-player.hidden { transform: translateY(120%); opacity: 0; pointer-events: none; }
+
+  .mp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .mp-title-wrap { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+  .mp-icon { font-size: 1.1rem; animation: spin 4s linear infinite; display: inline-block; }
+  .mp-icon.paused { animation-play-state: paused; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .mp-song-name {
+    font-family: 'Cormorant Garamond', serif; font-size: 0.9rem;
+    color: #f5e8eb; font-style: italic; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; max-width: 160px;
+  }
+  .mp-close {
+    background: none; border: none; color: #6b4a50; cursor: pointer;
+    font-size: 1rem; line-height: 1; padding: 2px 4px;
+    transition: color 0.2s;
+  }
+  .mp-close:hover { color: var(--rose); }
+
+  /* progress bar */
+  .mp-progress-wrap { position: relative; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 10px; cursor: pointer; }
+  .mp-progress-bar { height: 100%; background: linear-gradient(to right, var(--rose), var(--gold)); border-radius: 4px; width: 0%; transition: width 0.3s linear; pointer-events: none; }
+  .mp-time { display: flex; justify-content: space-between; font-size: 0.68rem; color: #6b4a50; margin-top: 4px; }
+
+  /* controls */
+  .mp-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 10px; }
+  .mp-btn {
+    background: none; border: none; cursor: pointer; color: #c8a9b0;
+    font-size: 1.1rem; padding: 6px; border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mp-btn:hover { color: var(--gold); background: rgba(200,169,110,0.1); }
+  .mp-btn.play-btn {
+    width: 40px; height: 40px; background: linear-gradient(135deg, var(--rose), #a02a3d);
+    color: white; font-size: 1rem;
+    box-shadow: 0 4px 14px rgba(192,55,76,0.4);
+  }
+  .mp-btn.play-btn:hover { background: linear-gradient(135deg, #d44060, var(--rose)); color: white; }
+
+  /* volume */
+  .mp-volume { display: flex; align-items: center; gap: 8px; }
+  .mp-vol-icon { font-size: 0.85rem; color: #6b4a50; }
+  .mp-vol-slider {
+    flex: 1; -webkit-appearance: none; appearance: none;
+    height: 3px; background: rgba(255,255,255,0.1); border-radius: 3px; outline: none; cursor: pointer;
+  }
+  .mp-vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--gold); cursor: pointer;
+  }
+
+  /* playlist */
+  .mp-playlist { margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px; max-height: 130px; overflow-y: auto; }
+  .mp-playlist::-webkit-scrollbar { width: 3px; }
+  .mp-playlist::-webkit-scrollbar-thumb { background: rgba(200,169,110,0.3); border-radius: 3px; }
+  .mp-playlist-item {
+    display: flex; align-items: center; gap: 8px; padding: 5px 6px;
+    border-radius: 8px; cursor: pointer; transition: background 0.2s;
+    font-size: 0.8rem; color: #9a6d74;
+  }
+  .mp-playlist-item:hover { background: rgba(255,255,255,0.05); color: #f5e8eb; }
+  .mp-playlist-item.active { background: rgba(192,55,76,0.15); color: var(--gold); }
+  .mp-playlist-item .track-num { font-size: 0.7rem; color: #6b4a50; width: 14px; text-align: center; }
+  .mp-playlist-item .track-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'Cormorant Garamond', serif; font-style: italic; }
+  .mp-playlist-item .track-dur { font-size: 0.68rem; color: #6b4a50; }
+
+  /* toggle button */
+  .music-toggle {
+    position: fixed; bottom: 24px; right: 24px; z-index: 998;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--rose), #a02a3d);
+    border: none; cursor: pointer; color: white; font-size: 1.3rem;
+    box-shadow: 0 4px 20px rgba(192,55,76,0.5);
+    display: none; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+  }
+  .music-toggle:hover { transform: scale(1.1); }
+  .music-toggle.show { display: flex; }
 </style>
 </head>
 <body>
@@ -356,6 +446,45 @@
   <p class="footer-sub">Dibuat dengan cinta yang tulus · Noppal · </p>
 </footer>
 
+<!-- ── MUSIC PLAYER ── -->
+<div class="music-player" id="musicPlayer">
+  <div class="mp-header">
+    <div class="mp-title-wrap">
+      <span class="mp-icon" id="mpIcon">🎵</span>
+      <span class="mp-song-name" id="mpSongName">Pilih lagu...</span>
+    </div>
+    <button class="mp-close" id="mpClose" title="Sembunyikan">✕</button>
+  </div>
+
+  <div class="mp-progress-wrap" id="mpProgressWrap">
+    <div class="mp-progress-bar" id="mpProgressBar"></div>
+  </div>
+  <div class="mp-time">
+    <span id="mpCurrent">0:00</span>
+    <span id="mpDuration">0:00</span>
+  </div>
+
+  <div class="mp-controls">
+    <button class="mp-btn" id="mpPrev" title="Sebelumnya">⏮</button>
+    <button class="mp-btn play-btn" id="mpPlay" title="Play/Pause">▶</button>
+    <button class="mp-btn" id="mpNext" title="Berikutnya">⏭</button>
+    <button class="mp-btn" id="mpLoop" title="Ulangi" style="font-size:0.85rem;">🔁</button>
+  </div>
+
+  <div class="mp-volume">
+    <span class="mp-vol-icon">🔈</span>
+    <input type="range" class="mp-vol-slider" id="mpVolume" min="0" max="1" step="0.05" value="0.7">
+    <span class="mp-vol-icon">🔊</span>
+  </div>
+
+  <div class="mp-playlist" id="mpPlaylist"></div>
+</div>
+
+<!-- Tombol buka player saat disembunyikan -->
+<button class="music-toggle" id="musicToggle" title="Buka Music Player">🎵</button>
+
+<audio id="audioPlayer"></audio>
+
 <script>
   const petals = document.getElementById('petals');
   const symbols = ['🌸', '🌹', '🌺', '✿', '❀', '💮'];
@@ -381,6 +510,131 @@
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // ── MUSIC PLAYER SCRIPT ──
+  const playlist = [
+    { name: "Kesempurnaan Cinta – Rizky Febian", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { name: "Kamu – Raisa", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { name: "Satu Rasa Cinta – Afgan", src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+  ];
+  // 💡 Ganti src di atas dengan URL lagu yang kamu mau
+  // Contoh file lokal: src: "music/lagu.mp3"
+  // Contoh YouTube audio tidak bisa langsung, gunakan file .mp3
+
+  let currentTrack = 0;
+  let isLooping = false;
+
+  const audio       = document.getElementById('audioPlayer');
+  const mpPlay      = document.getElementById('mpPlay');
+  const mpPrev      = document.getElementById('mpPrev');
+  const mpNext      = document.getElementById('mpNext');
+  const mpLoop      = document.getElementById('mpLoop');
+  const mpSongName  = document.getElementById('mpSongName');
+  const mpIcon      = document.getElementById('mpIcon');
+  const mpProgress  = document.getElementById('mpProgressBar');
+  const mpProgressW = document.getElementById('mpProgressWrap');
+  const mpCurrent   = document.getElementById('mpCurrent');
+  const mpDuration  = document.getElementById('mpDuration');
+  const mpVolume    = document.getElementById('mpVolume');
+  const mpPlaylist  = document.getElementById('mpPlaylist');
+  const mpClose     = document.getElementById('mpClose');
+  const musicPlayer = document.getElementById('musicPlayer');
+  const musicToggle = document.getElementById('musicToggle');
+
+  function formatTime(s) {
+    if (isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  function loadTrack(index) {
+    currentTrack = index;
+    const track = playlist[index];
+    audio.src = track.src;
+    mpSongName.textContent = track.name;
+    renderPlaylist();
+    audio.play().then(() => {
+      mpPlay.textContent = '⏸';
+      mpIcon.classList.remove('paused');
+    }).catch(() => {});
+  }
+
+  function renderPlaylist() {
+    mpPlaylist.innerHTML = '';
+    playlist.forEach((t, i) => {
+      const item = document.createElement('div');
+      item.className = 'mp-playlist-item' + (i === currentTrack ? ' active' : '');
+      item.innerHTML = `<span class="track-num">${i + 1}</span><span class="track-name">${t.name}</span>`;
+      item.addEventListener('click', () => loadTrack(i));
+      mpPlaylist.appendChild(item);
+    });
+  }
+
+  mpPlay.addEventListener('click', () => {
+    if (audio.paused) {
+      if (!audio.src) loadTrack(0);
+      else audio.play();
+      mpPlay.textContent = '⏸';
+      mpIcon.classList.remove('paused');
+    } else {
+      audio.pause();
+      mpPlay.textContent = '▶';
+      mpIcon.classList.add('paused');
+    }
+  });
+
+  mpPrev.addEventListener('click', () => {
+    loadTrack((currentTrack - 1 + playlist.length) % playlist.length);
+  });
+
+  mpNext.addEventListener('click', () => {
+    loadTrack((currentTrack + 1) % playlist.length);
+  });
+
+  mpLoop.addEventListener('click', () => {
+    isLooping = !isLooping;
+    audio.loop = isLooping;
+    mpLoop.style.color = isLooping ? 'var(--gold)' : '';
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      mpProgress.style.width = (audio.currentTime / audio.duration * 100) + '%';
+      mpCurrent.textContent = formatTime(audio.currentTime);
+      mpDuration.textContent = formatTime(audio.duration);
+    }
+  });
+
+  audio.addEventListener('ended', () => {
+    if (!isLooping) {
+      const next = (currentTrack + 1) % playlist.length;
+      loadTrack(next);
+    }
+  });
+
+  mpProgressW.addEventListener('click', (e) => {
+    const rect = mpProgressW.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = ratio * audio.duration;
+  });
+
+  mpVolume.addEventListener('input', () => {
+    audio.volume = mpVolume.value;
+  });
+  audio.volume = 0.7;
+
+  mpClose.addEventListener('click', () => {
+    musicPlayer.classList.add('hidden');
+    musicToggle.classList.add('show');
+  });
+
+  musicToggle.addEventListener('click', () => {
+    musicPlayer.classList.remove('hidden');
+    musicToggle.classList.remove('show');
+  });
+
+  renderPlaylist();
 </script>
 </body>
 </html>
